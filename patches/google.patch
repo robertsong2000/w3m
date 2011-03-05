@@ -1,0 +1,192 @@
+Index: w3m-0.5.2/main.c
+===================================================================
+--- w3m-0.5.2.orig/main.c
++++ w3m-0.5.2/main.c
+@@ -37,6 +37,9 @@ Hist *SaveHist;
+ Hist *URLHist;
+ Hist *ShellHist;
+ Hist *TextHist;
++Hist *DictHist;
++Hist *GoogleHist;
++Hist *GoogleLuckyHist;
+ 
+ typedef struct _Event {
+     int cmd;
+@@ -457,6 +460,9 @@ main(int argc, char **argv, char **envp)
+     SaveHist = newHist();
+     ShellHist = newHist();
+     TextHist = newHist();
++    DictHist = newHist();
++    GoogleHist = newHist();
++    GoogleLuckyHist = newHist();
+     URLHist = newHist();
+ 
+ #ifdef USE_M17N
+@@ -5609,7 +5615,7 @@ execdict(char *word)
+ 
+ DEFUN(dictword, DICT_WORD, "Execute dictionary command (see README.dict)")
+ {
+-    execdict(inputStr("(dictionary)!", ""));
++    execdict(inputStrHist("(dictionary)!", "", DictHist));
+ }
+ 
+ DEFUN(dictwordat, DICT_WORD_AT,
+@@ -5619,6 +5625,95 @@ DEFUN(dictwordat, DICT_WORD_AT,
+ }
+ #endif				/* USE_DICT */
+ 
++#ifdef USE_GOOGLE
++static void
++execgoogle(char *word)
++{
++    char *w, *dictcmd;
++    Buffer *buf;
++
++    if (!UseGoogleCommand || word == NULL || *word == '\0') {
++	displayBuffer(Currentbuf, B_NORMAL);
++	return;
++    }
++    w = conv_to_system(word);
++    if (*w == '\0') {
++	displayBuffer(Currentbuf, B_NORMAL);
++	return;
++    }
++    dictcmd = Sprintf("%s?%s", GoogleCommand,
++		      Str_form_quote(Strnew_charp(w))->ptr)->ptr;
++    buf = loadGeneralFile(dictcmd, NULL, NO_REFERER, 0, NULL);
++    if (buf == NULL) {
++	disp_message("Execution failed", TRUE);
++	return;
++    }
++    else {
++	buf->filename = w;
++	buf->buffername = Sprintf("%s %s", GOOGLEBUFFERNAME, word)->ptr;
++	if (buf->type == NULL)
++	    buf->type = "text/plain";
++	pushBuffer(buf);
++    }
++    displayBuffer(Currentbuf, B_FORCE_REDRAW);
++}
++
++DEFUN(googleword, GOOGLE_WORD, "Execute google search (see README.google)")
++{
++    execgoogle(inputStrHist("(google)!", "", GoogleHist));
++}
++
++DEFUN(googlewordat, GOOGLE_WORD_AT,
++      "Execute google search for word at cursor")
++{
++    execgoogle(GetWord(Currentbuf));
++}
++#endif				/* USE_GOOGLE */
++#ifdef USE_GOOGLE_LUCKY
++static void
++execgooglelucky(char *word)
++{
++    char *w, *dictcmd;
++    Buffer *buf;
++
++    if (!UseGoogleLuckyCommand || word == NULL || *word == '\0') {
++	displayBuffer(Currentbuf, B_NORMAL);
++	return;
++    }
++    w = conv_to_system(word);
++    if (*w == '\0') {
++	displayBuffer(Currentbuf, B_NORMAL);
++	return;
++    }
++    dictcmd = Sprintf("%s?%s", GoogleLuckyCommand,
++		      Str_form_quote(Strnew_charp(w))->ptr)->ptr;
++    buf = loadGeneralFile(dictcmd, NULL, NO_REFERER, 0, NULL);
++    if (buf == NULL) {
++	disp_message("Execution failed", TRUE);
++	return;
++    }
++    else {
++	buf->filename = w;
++	buf->buffername = Sprintf("%s %s", GOOGLELUCKYBUFFERNAME, word)->ptr;
++	if (buf->type == NULL)
++	    buf->type = "text/plain";
++	pushBuffer(buf);
++    }
++    displayBuffer(Currentbuf, B_FORCE_REDRAW);
++}
++
++DEFUN(googleluckyword, GOOGLE_LUCKY_WORD, "Execute google lucky search (see README.google.lucky)")
++{
++    execgooglelucky(inputStrHist("(google lucky)!", "", GoogleLuckyHist));
++}
++
++DEFUN(googleluckywordat, GOOGLE_LUCKY_WORD_AT,
++      "Execute google lucky search for word at cursor")
++{
++    execgooglelucky(GetWord(Currentbuf));
++}
++#endif				/* USE_GOOGLE_LUCKY */
++
+ void
+ set_buffer_environ(Buffer *buf)
+ {
+Index: w3m-0.5.2/proto.h
+===================================================================
+--- w3m-0.5.2.orig/proto.h
++++ w3m-0.5.2/proto.h
+@@ -764,6 +764,20 @@ extern void dictwordat(void);
+ #define dictword nulcmd
+ #define dictwordat nulcmd
+ #endif				/* not USE_DICT */
++#ifdef USE_GOOGLE
++extern void googleword(void);
++extern void googlewordat(void);
++#else				/* not USE_GOOGLE */
++#define googleword nulcmd
++#define googlewordat nulcmd
++#endif				/* not USE_GOOGLE */
++#ifdef USE_GOOGLE_LUCKY
++extern void googleluckyword(void);
++extern void googleluckywordat(void);
++#else				/* not USE_GOOGLE_LUCKY */
++#define googleluckyword nulcmd
++#define googleluckywordat nulcmd
++#endif				/* not USE_GOOGLE_LUCKY */
+ #if 0
+ extern void reloadBuffer(Buffer *buf);
+ #endif
+Index: w3m-0.5.2/rc.c
+===================================================================
+--- w3m-0.5.2.orig/rc.c
++++ w3m-0.5.2/rc.c
+@@ -164,6 +164,14 @@ static int OptionEncode = FALSE;
+ #define CMT_USE_DICTCOMMAND  N_("Enable dictionary lookup through CGI")
+ #define CMT_DICTCOMMAND  N_("URL of dictionary lookup command")
+ #endif				/* USE_DICT */
++#ifdef USE_GOOGLE
++#define CMT_USE_GOOGLECOMMAND  N_("Enable google search through CGI")
++#define CMT_GOOGLECOMMAND  N_("URL of google search command")
++#endif				/* USE_GOOGLE */
++#ifdef USE_GOOGLE_LUCKY
++#define CMT_USE_GOOGLELUCKYCOMMAND  N_("Enable google lucky search through CGI")
++#define CMT_GOOGLELUCKYCOMMAND  N_("URL of google lucky search command")
++#endif				/* USE_GOOGLE_LUCKY */
+ #define CMT_IGNORE_NULL_IMG_ALT	N_("Display link name for images lacking ALT")
+ #define CMT_IFILE        N_("Index file for directories")
+ #define CMT_RETRY_HTTP   N_("Prepend http:// to URL automatically")
+@@ -361,6 +369,18 @@ struct param_ptr params1[] = {
+     {"dictcommand", P_STRING, PI_TEXT, (void *)&DictCommand,
+      CMT_DICTCOMMAND, NULL},
+ #endif				/* USE_DICT */
++#ifdef USE_GOOGLE
++    {"use_googlecommand", P_INT, PI_ONOFF, (void *)&UseGoogleCommand,
++     CMT_USE_GOOGLECOMMAND, NULL},
++    {"googlecommand", P_STRING, PI_TEXT, (void *)&GoogleCommand,
++     CMT_GOOGLECOMMAND, NULL},
++#endif				/* USE_GOOGLE */
++#ifdef USE_GOOGLE_LUCKY
++    {"use_googleluckycommand", P_INT, PI_ONOFF, (void *)&UseGoogleLuckyCommand,
++     CMT_USE_GOOGLELUCKYCOMMAND, NULL},
++    {"googleluckycommand", P_STRING, PI_TEXT, (void *)&GoogleLuckyCommand,
++     CMT_GOOGLELUCKYCOMMAND, NULL},
++#endif				/* USE_GOOGLE_LUCKY */
+     {"multicol", P_INT, PI_ONOFF, (void *)&multicolList, CMT_MULTICOL, NULL},
+     {"alt_entity", P_CHARINT, PI_ONOFF, (void *)&UseAltEntity, CMT_ALT_ENTITY,
+      NULL},
