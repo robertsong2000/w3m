@@ -737,6 +737,8 @@ USE_COOKIE
 USE_NNTP
 USE_GOPHER
 USE_DICT
+USE_GOOGLE
+USE_GOOGLE_LUCKY
 USE_HELP_CGI
 USE_EXTERNAL_URI_LOADER
 USE_W3MMAILER
@@ -6100,6 +6102,39 @@ _ACEOF
 
  { echo "$as_me:$LINENO: result: $enable_dict" >&5
 echo "${ECHO_T}$enable_dict" >&6; }
+
+{ echo "$as_me:$LINENO: checking if google lookup is enabled" >&5
+echo $ECHO_N "checking if google lookup is enabled... $ECHO_C" >&6; }
+# Check whether --enable-google was given.
+if test "${enable_google+set}" = set; then
+  enableval=$enable_google;
+else
+  enable_google="yes"
+fi
+
+ test x"$enable_google" = xyes && cat >>confdefs.h <<\_ACEOF
+#define USE_GOOGLE 1
+_ACEOF
+
+ { echo "$as_me:$LINENO: result: $enable_google" >&5
+echo "${ECHO_T}$enable_google" >&6; }
+
+{ echo "$as_me:$LINENO: checking if google lucky lookup is enabled" >&5
+echo $ECHO_N "checking if google lucky lookup is enabled... $ECHO_C" >&6; }
+# Check whether --enable-google-lucky was given.
+if test "${enable_google_lucky+set}" = set; then
+  enableval=$enable_google_lucky;
+else
+  enable_google_lucky="yes"
+fi
+
+ test x"$enable_google_lucky" = xyes && cat >>confdefs.h <<\_ACEOF
+#define USE_GOOGLE_LUCKY 1
+_ACEOF
+
+ { echo "$as_me:$LINENO: result: $enable_google_lucky" >&5
+echo "${ECHO_T}$enable_google_lucky" >&6; }
+
 
  { echo "$as_me:$LINENO: checking if help cgi is enabled" >&5
 echo $ECHO_N "checking if help cgi is enabled... $ECHO_C" >&6; }
@@ -11642,6 +11677,8 @@ USE_COOKIE!$USE_COOKIE$ac_delim
 USE_NNTP!$USE_NNTP$ac_delim
 USE_GOPHER!$USE_GOPHER$ac_delim
 USE_DICT!$USE_DICT$ac_delim
+USE_GOOGLE!$USE_GOOGLE$ac_delim
+USE_GOOGLE_LUCKY!$USE_GOOGLE_LUCKY$ac_delim
 USE_HELP_CGI!$USE_HELP_CGI$ac_delim
 USE_EXTERNAL_URI_LOADER!$USE_EXTERNAL_URI_LOADER$ac_delim
 USE_W3MMAILER!$USE_W3MMAILER$ac_delim
@@ -11677,7 +11714,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 59; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 61; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

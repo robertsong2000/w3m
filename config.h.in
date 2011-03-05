@@ -76,6 +76,8 @@
 #undef USE_IMLIB2
 #undef USE_XFACE
 #undef USE_DICT
+#undef USE_GOOGLE
+#undef USE_GOOGLE_LUCKY
 #undef USE_HISTORY
 #undef FORMAT_NICE
 #define ID_EXT

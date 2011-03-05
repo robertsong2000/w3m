@@ -317,3 +317,7 @@ dist:
 bindist:
 	cd ..; tar cvfz w3m-$(VERSION)-$(MODEL).tar.gz w3m/w3m* w3m/doc* w3m/Bonus* w3m/README w3m/scripts 
 
+cscope:
+	rm -f ./cscope.*
+	find . -name "*.[ch]" -print | grep -v "\.pc\/" | sed 's,^\./,,' > ./cscope.files
+	cscope -b
