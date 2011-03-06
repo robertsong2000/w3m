@@ -5704,7 +5704,7 @@ execgooglelucky(char *word)
 
 DEFUN(googleluckyword, GOOGLE_LUCKY_WORD, "Execute google lucky search (see README.google.lucky)")
 {
-    execgooglelucky(inputStrHist("(google lucky)!", "", GoogleLuckyHist));
+    execgooglelucky(inputStrHist("(google lucky)!", "", GoogleHist));
 }
 
 DEFUN(googleluckywordat, GOOGLE_LUCKY_WORD_AT,
